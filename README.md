@@ -17,3 +17,10 @@ ip.txt e.g:
 119.118.117.116
 119.118.117.110
 ```
+
+## domain2ip.sh
+Convert domain name to ip address.
+```
+bash domain2ip.sh domains.txt | tee -a ips.txt
+```
+
