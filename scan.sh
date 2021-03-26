@@ -14,7 +14,7 @@ function scan_ip()
 
 	# fast scan
 	nmap -sC -sV --script=vuln -p${tcp_fast_ports} -n -Pn $1 -oN nmap_${1}.txt
-	nmap -sU --top-ports 30 --open -n -Pn $1 2>/dev/null | sed -n '4,$p' | tee -a nmap_${1}.txt
+	nmap -sUC --top-ports 30 --open -n -Pn $1 2>/dev/null | sed -n '4,$p' | tee -a nmap_${1}.txt
 
 	# stage2 masscan full ports
 	masscan -p1-65535 -n -Pn $1 | tee -a masscan_${1}.txt
