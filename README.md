@@ -19,8 +19,8 @@ ip.txt e.g:
 ```
 
 ## domain2ip.sh
-Convert domain name to ip address.
+Convert domain name to ip address by PING command.
 ```
-bash domain2ip.sh domains.txt | tee -a ips.txt
+bash domain2ip.sh domains.txt
 ```
-
+Result will be stored in domains.txt.ip.
