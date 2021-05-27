@@ -399,13 +399,14 @@ int main(int argc, char** argv) {
     parse_ports(argv[3]);
 
     int t_sum = g_s_ips.size() * g_ports.size() * g_d_ips.size();
+    int t_sum2 = g_s_ips.size() * g_ports.size();
     for (int j = 0; j < g_s_ips.size(); ++j) {
         for (int i = 0; i < g_ports.size(); ++i) {
             for (int k = 0; k < g_d_ips.size(); ++k) {
                 send_syn(g_s_ips[j].c_str(), g_d_ips[k].c_str(), g_ports[i]);
                 usleep(SEND_SLEEP);
             }
-            printf("\rscan  %d/%d    %%%02d", (i + 1) * (j + 1) * (int)g_d_ips.size(), t_sum, int((i + 1) * (j + 1) * 100 / t_sum));
+            printf("\rscan  %d/%d    %%%02d", (i + 1) * (j + 1) * (int)g_d_ips.size(), t_sum, int((i + 1) * (j + 1) * 100 / t_sum2));
             fflush(stdout);
         }
     }
