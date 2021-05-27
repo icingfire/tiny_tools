@@ -387,8 +387,8 @@ int main(int argc, char** argv) {
     parse_ips(argv[2], 1);
     parse_ports(argv[3]);
 
-    for (int i = 0; i < g_ports.size(); ++i) {
-        for (int j = 0; j < g_s_ips.size(); ++j) {
+    for (int j = 0; j < g_s_ips.size(); ++j) {
+        for (int i = 0; i < g_ports.size(); ++i) {
             for (int k = 0; k < g_d_ips.size(); ++k) {
                 send_syn(g_s_ips[j].c_str(), g_d_ips[k].c_str(), g_ports[i]);
             }
