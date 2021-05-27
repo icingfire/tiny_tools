@@ -6,6 +6,9 @@
 
    ./binary  source_ips  target_ips  ports 
    ./binary  10.10.10.20,10.10.10.80-82  192.168.0.2-100,192.168.1.110,192.168.3-200  22,443,8080,10000-10010
+
+   note:
+     Change SEND_SLEEP macro to control send rate
  */
 
 #include <stdio.h>
@@ -168,9 +171,13 @@ struct tcp_hdr {
 
 // ----------------------------------- code start -----------------------------
 
+// sleep 0.5 ms before sending next syn
+#define SEND_SLEEP 500
+
 vector<string> g_s_ips;
 vector<string> g_d_ips;
 vector<int> g_ports;
+int g_sock;
 
 
 /* Do a basic IPv4 TCP checksum. */
@@ -227,11 +234,22 @@ static int parse_addr(const char* str, u8* ret) {
 }
 
 
+int init_sock() {
+    char one = 1;
+    g_sock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+    if (g_sock < 0) {
+        printf("open raw socket failed \n");
+        exit(1);
+    }
+    
+    if (setsockopt(g_sock, IPPROTO_IP, IP_HDRINCL, (char*)&one, sizeof(char)))
+        printf("setsockopt() on raw socket failed.");
+}
+
+
 int send_syn(const char* src_ip, const char* dst_ip, int dst_port) {
 
     static struct sockaddr_in sin;
-    char one = 1;
-    s32  sock;
     u32  i;
 
     static u8 work_buf[MIN_TCP4];
@@ -246,15 +264,7 @@ int send_syn(const char* src_ip, const char* dst_ip, int dst_port) {
         return 1;
     }
 
-    sock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-
-    if (sock < 0) printf("Can't open raw socket (you need to be root).");
-
-    if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, (char*)&one, sizeof(char)))
-        printf("setsockopt() on raw socket failed.");
-
     sin.sin_family = PF_INET;
-
     memcpy(&sin.sin_addr.s_addr, ip4->dst, 4);
 
     ip4->ver_hlen = 0x45;
@@ -269,10 +279,9 @@ int send_syn(const char* src_ip, const char* dst_ip, int dst_port) {
     tcp->win = htons(1024);
 
     tcp->sport = htons((rand() % 40000) + 20000);
-
     tcp_cksum(ip4->src, ip4->dst, tcp, 0);
 
-    if (sendto(sock, work_buf, sizeof(work_buf), 0, (struct sockaddr*)&sin,
+    if (sendto(g_sock, work_buf, sizeof(work_buf), 0, (struct sockaddr*)&sin,
         sizeof(struct sockaddr_in)) < 0) printf("sendto() fails.");
 
     //printf("send syn  %s : %d --> %s : %d\n", src_ip, ntohs(tcp->sport), dst_ip, dst_port);
@@ -383,15 +392,21 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    init_sock();
+
     parse_ips(argv[1], 0);
     parse_ips(argv[2], 1);
     parse_ports(argv[3]);
 
+    int t_sum = g_s_ips.size() * g_ports.size() * g_d_ips.size();
     for (int j = 0; j < g_s_ips.size(); ++j) {
         for (int i = 0; i < g_ports.size(); ++i) {
             for (int k = 0; k < g_d_ips.size(); ++k) {
                 send_syn(g_s_ips[j].c_str(), g_d_ips[k].c_str(), g_ports[i]);
+                usleep(SEND_SLEEP);
             }
+            printf("\rscan  %d/%d    %%%02d", (i + 1) * (j + 1) * (int)g_d_ips.size(), t_sum, int((i + 1) * (j + 1) * 100 / t_sum));
+            fflush(stdout);
         }
     }
 
