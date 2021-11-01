@@ -9,12 +9,12 @@ def generate_random_str():
             yield "".join(item)
 
 
-def brute_hash(preffix_str, zero_bit_cnt):
+def brute_hash(prefix_str, zero_bit_cnt):
     local_iter = generate_random_str()
     zero_digit_cnt = int(zero_bit_cnt / 4)
     half_digit_flag = zero_bit_cnt % 4
     while True:
-        n_data = preffix_str + next(local_iter)
+        n_data = prefix_str + next(local_iter)
         n_d_sha = hashlib.sha256(n_data.encode("utf-8")).hexdigest()
         if n_d_sha[0:zero_digit_cnt] == "0"*zero_digit_cnt:
             if half_digit_flag and int(n_d_sha[zero_digit_cnt],16) & ((1<<half_digit_flag)-1):
