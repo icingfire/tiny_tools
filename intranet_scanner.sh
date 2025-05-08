@@ -87,12 +87,12 @@ cd $(dirname $0)
 
 dir_name=$(date "+%y%m%d%H%M%S")
 if [ -n "$1" ]; then
-  if [ -d "$1" ]; then
+  if [ -d "$1" ] && [ -f "$1/progress.txt" ]; then
     con_flag=1
+    dir_name=$1
     echo "continue from ${dir_name}"
   else
-    echo "can not find $1"
-    exit 1
+    echo "can not find $1/progress.txt"
   fi
 fi
 
