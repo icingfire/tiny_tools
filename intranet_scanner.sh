@@ -5,7 +5,8 @@
 # https://github.com/robertdavidgraham/masscan/releases
 #
 # Usage:
-# $1  progress file, e.g: progress250508065524.txt
+# $0                 # start from begining
+# $0  progress_file  # start from last_stop e.g: progress250508065524.txt
 #
 # author: icingfire
 #################
@@ -51,10 +52,10 @@ fscan_main() {
 masscan_subnet() {
   if [ ${con_flag} -ne 0 ]; then
     grep -q "masscan $1" $progress_file
-	if [ $? -eq 0 ]; then
-	  echo "----- skip masscan $1 -----"
-	  return
-	fi
+    if [ $? -eq 0 ]; then
+      echo "----- skip masscan $1 -----"
+      return
+    fi
   fi
   echo "===== start masscan $1 ====="
   ./masscan -p80,443,22,8080,25,21,23,3389,445,53 --open "$1" --rate=${masscan_rate} >> ${masscan_file}
