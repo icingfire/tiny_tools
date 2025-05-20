@@ -45,7 +45,7 @@ fscan_sub() {
 fscan_main() {
   fscan_sub
   fscan_sub
-  grep ICMP ${fscan_file} | awk '{print $5}' | sort -u >> ${ips_tmp}
+  grep icmp ${fscan_file} | awk '{print $3}' | sort -u >> ${ips_tmp}
 }
 
 
